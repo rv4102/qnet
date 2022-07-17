@@ -209,13 +209,29 @@ def symmetric_focal_loss(delta=0.7, gamma=2.):
         y_pred = K.clip(y_pred, epsilon, 1. - epsilon)
         cross_entropy = -y_true * K.log(y_pred)
         #calculate losses separately for each class
-        back_ce = K.pow(1 - y_pred[:,:,:,0], gamma) * cross_entropy[:,:,:,0]
-        back_ce =  (1 - delta) * back_ce
 
         fore_ce = K.pow(1 - y_pred[:,:,:,1], gamma) * cross_entropy[:,:,:,1]
         fore_ce = delta * fore_ce
 
-        loss = K.mean(K.sum(tf.stack([back_ce, fore_ce],axis=-1),axis=-1))
+        # modify this section below for multiclass segmentation
+        # 0 is background, 1 is building, 2 is woodland, 3 is water, 4 is road
+
+        back_ce = K.pow(1 - y_pred[:,:,:,0], gamma) * cross_entropy[:,:,:,0]
+        back_ce =  (1 - delta) * back_ce
+
+        building_ce = cross_entropy[:,:,:,1]
+        building_ce = delta * building_ce
+
+        woodland_ce = cross_entropy[:,:,:,2]
+        woodland_ce = delta * woodland_ce
+
+        water_ce = cross_entropy[:,:,:,3]
+        water_ce = delta * water_ce
+
+        road_ce = cross_entropy[:,:,:,4]
+        road_ce = delta * road_ce
+
+        loss = K.mean(K.sum(tf.stack([back_ce, building_ce, woodland_ce, water_ce, road_ce],axis=-1),axis=-1))
 
         return loss
 
@@ -225,7 +241,7 @@ def symmetric_focal_loss(delta=0.7, gamma=2.):
 # Symmetric Focal Tversky loss  #
 #################################
 def symmetric_focal_tversky_loss(delta=0.7, gamma=0.75):
-    """This is the implementation for binary segmentation.
+    """This is the implementation for multi-class segmentation.
     Parameters
     ----------
     delta : float, optional
@@ -246,11 +262,16 @@ def symmetric_focal_tversky_loss(delta=0.7, gamma=0.75):
         dice_class = (tp + epsilon)/(tp + delta*fn + (1-delta)*fp + epsilon)
 
         #calculate losses separately for each class, enhancing both classes
+        # modify this section below for multiclass segmentation
+
         back_dice = (1-dice_class[:,0]) * K.pow(1-dice_class[:,0], -gamma) 
-        fore_dice = (1-dice_class[:,1]) * K.pow(1-dice_class[:,1], -gamma) 
+        building_dice = (1-dice_class[:,1]) * K.pow(1-dice_class[:,1], -gamma) 
+        woodland_dice = (1-dice_class[:,2]) * K.pow(1-dice_class[:,2], -gamma)
+        water_dice = (1-dice_class[:,3]) * K.pow(1-dice_class[:,3], -gamma)
+        road_dice = (1-dice_class[:,4]) * K.pow(1-dice_class[:,4], -gamma) 
 
         # Average class scores
-        loss = K.mean(tf.stack([back_dice,fore_dice],axis=-1))
+        loss = K.mean(tf.stack([back_dice,building_dice,woodland_dice,water_dice,road_dice],axis=-1))
         return loss
 
     return loss_function
@@ -260,7 +281,7 @@ def symmetric_focal_tversky_loss(delta=0.7, gamma=0.75):
 #     Asymmetric Focal loss    #
 ################################
 def asymmetric_focal_loss(delta=0.7, gamma=2.):
-    """For Imbalanced datasets
+    """For Imbalanced datasets (multi-class)
     Parameters
     ----------
     delta : float, optional
@@ -276,13 +297,25 @@ def asymmetric_focal_loss(delta=0.7, gamma=2.):
         cross_entropy = -y_true * K.log(y_pred)
 
         #calculate losses separately for each class, only suppressing background class
+        # modify this section below for multiclass segmentation
+        # 0 is background, 1 is building, 2 is woodland, 3 is water, 4 is road
+
         back_ce = K.pow(1 - y_pred[:,:,:,0], gamma) * cross_entropy[:,:,:,0]
         back_ce =  (1 - delta) * back_ce
 
-        fore_ce = cross_entropy[:,:,:,1]
-        fore_ce = delta * fore_ce
+        building_ce = cross_entropy[:,:,:,1]
+        building_ce = delta * building_ce
 
-        loss = K.mean(K.sum(tf.stack([back_ce, fore_ce],axis=-1),axis=-1))
+        woodland_ce = cross_entropy[:,:,:,2]
+        woodland_ce = delta * woodland_ce
+
+        water_ce = cross_entropy[:,:,:,3]
+        water_ce = delta * water_ce
+
+        road_ce = cross_entropy[:,:,:,4]
+        road_ce = delta * road_ce
+
+        loss = K.mean(K.sum(tf.stack([back_ce, building_ce, woodland_ce, water_ce, road_ce],axis=-1),axis=-1))
 
         return loss
 
@@ -292,7 +325,7 @@ def asymmetric_focal_loss(delta=0.7, gamma=2.):
 # Asymmetric Focal Tversky loss #
 #################################
 def asymmetric_focal_tversky_loss(delta=0.7, gamma=0.75):
-    """This is the implementation for binary segmentation.
+    """This is the implementation for multi-class segmentation.
     Parameters
     ----------
     delta : float, optional
@@ -313,11 +346,15 @@ def asymmetric_focal_tversky_loss(delta=0.7, gamma=0.75):
         dice_class = (tp + epsilon)/(tp + delta*fn + (1-delta)*fp + epsilon)
 
         #calculate losses separately for each class, only enhancing foreground class
+        # modify this section below for multiclass segmentation
         back_dice = (1-dice_class[:,0]) 
-        fore_dice = (1-dice_class[:,1]) * K.pow(1-dice_class[:,1], -gamma) 
+        building_dice = (1-dice_class[:,1]) * K.pow(1-dice_class[:,1], -gamma) 
+        woodland_dice = (1-dice_class[:,2]) * K.pow(1-dice_class[:,2], -gamma)
+        water_dice = (1-dice_class[:,3]) * K.pow(1-dice_class[:,3], -gamma)
+        road_dice = (1-dice_class[:,4]) * K.pow(1-dice_class[:,4], -gamma) 
 
         # Average class scores
-        loss = K.mean(tf.stack([back_dice,fore_dice],axis=-1))
+        loss = K.mean(tf.stack([back_dice,building_dice,woodland_dice,water_dice,road_dice],axis=-1))
         return loss
 
     return loss_function
