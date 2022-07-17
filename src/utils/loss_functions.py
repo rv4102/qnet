@@ -1,4 +1,6 @@
-# this file is taken from https://github.com/mlyg/unified-focal-loss/blob/main/loss_functions.py
+# This file is taken 
+# from https://github.com/mlyg/unified-focal-loss/blob/main/loss_functions.py
+# Edited to make it compatible with multi-class segmentation
 
 from tensorflow.keras import backend as K
 import numpy as np
@@ -13,6 +15,32 @@ def identify_axis(shape):
     elif len(shape) == 4 : return [1,2]
     # Exception - Unknown
     else : raise ValueError('Metric: Shape of tensor is neither 2D or 3D.')
+
+################################
+#       Dice coefficient       #
+################################
+def dice_coefficient(delta = 0.5, smooth = 0.000001):
+    """The Dice similarity coefficient, also known as the Sørensen–Dice index or simply Dice coefficient, is a statistical tool which measures the similarity between two sets of data.
+    Parameters
+    ----------
+    delta : float, optional
+        controls weight given to false positive and false negatives, by default 0.5
+    smooth : float, optional
+        smoothing constant to prevent division by zero errors, by default 0.000001
+    """
+    def loss_function(y_true, y_pred):
+        axis = identify_axis(y_true.get_shape())
+        # Calculate true positives (tp), false negatives (fn) and false positives (fp)   
+        tp = K.sum(y_true * y_pred, axis=axis)
+        fn = K.sum(y_true * (1-y_pred), axis=axis)
+        fp = K.sum((1-y_true) * y_pred, axis=axis)
+        dice_class = (tp + smooth)/(tp + delta*fn + (1-delta)*fp + smooth)
+        # Average class scores
+        dice = K.mean(dice_class)
+
+        return dice
+
+    return loss_function
 
 ################################
 #           Dice loss          #
@@ -67,32 +95,6 @@ def tversky_loss(delta = 0.7, smooth = 0.000001):
         tversky_loss = K.mean(1-tversky_class)
 
         return tversky_loss
-
-    return loss_function
-
-################################
-#       Dice coefficient       #
-################################
-def dice_coefficient(delta = 0.5, smooth = 0.000001):
-    """The Dice similarity coefficient, also known as the Sørensen–Dice index or simply Dice coefficient, is a statistical tool which measures the similarity between two sets of data.
-    Parameters
-    ----------
-    delta : float, optional
-        controls weight given to false positive and false negatives, by default 0.5
-    smooth : float, optional
-        smoothing constant to prevent division by zero errors, by default 0.000001
-    """
-    def loss_function(y_true, y_pred):
-        axis = identify_axis(y_true.get_shape())
-        # Calculate true positives (tp), false negatives (fn) and false positives (fp)   
-        tp = K.sum(y_true * y_pred, axis=axis)
-        fn = K.sum(y_true * (1-y_pred), axis=axis)
-        fp = K.sum((1-y_true) * y_pred, axis=axis)
-        dice_class = (tp + smooth)/(tp + delta*fn + (1-delta)*fp + smooth)
-        # Average class scores
-        dice = K.mean(dice_class)
-
-        return dice
 
     return loss_function
 
