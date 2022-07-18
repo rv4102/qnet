@@ -45,7 +45,7 @@ def dice_coefficient(delta = 0.5, smooth = 0.000001):
 ################################
 #         OneHot MeanIoU       #
 ################################
-def OneHotMeanIoU(tf.keras.metrics.MeanIoU):
+class OneHotMeanIoU(tf.keras.metrics.MeanIoU):
     '''
     Custom metric to calculate OneHotMeanIoU
     as the keras version is not available in tf 2.6
