@@ -254,14 +254,14 @@ def symmetric_focal_loss(delta=0.7, gamma=2.):
 
         # This section is modified for multiclass segmentation
         numClasses = K.int_shape(y_pred)[-1]
-        total_ce = background_ce
-
+        list_of_class_ce = [background_ce]
+        
         for i in range(1, numClasses):
             class_ce = cross_entropy[:,:,:,i]
             class_ce = delta * class_ce
-            total_ce = tf.stack([total_ce, class_ce], axis=-1)
+            list_of_class_ce.append(class_ce)
 
-        loss = K.mean(K.sum(total_ce, axis=-1))
+        loss = K.mean(K.sum(tf.stack(list_of_class_ce, axis=-1), axis=-1))
 
         return loss
 
@@ -296,13 +296,13 @@ def symmetric_focal_tversky_loss(delta=0.7, gamma=0.75):
 
         # modify this section below for multiclass segmentation
         numClasses = K.int_shape(y_pred)[-1]
-        total_dice = background_dice
+        list_of_class_dice = [background_dice]
         for i in range(1, numClasses):
             class_dice = (1-dice_class[:,i]) * K.pow(1-dice_class[:,i], -gamma)
-            total_dice = tf.stack([total_dice, class_dice], axis=-1)
+            list_of_class_dice.append(class_dice)
 
         # Average class scores
-        loss = K.mean(total_dice)
+        loss = K.mean(tf.stack(list_of_class_dice, axis=-1))
         return loss
 
     return loss_function
@@ -333,14 +333,14 @@ def asymmetric_focal_loss(delta=0.7, gamma=2.):
 
         # This section is modified for multiclass segmentation
         numClasses = K.int_shape(y_pred)[-1]
-        total_ce = background_ce
+        list_of_class_ce = [background_ce]
 
         for i in range(1, numClasses):
             class_ce = cross_entropy[:,:,:,i]
             class_ce = delta * class_ce
-            total_ce = tf.stack([total_ce, class_ce], axis=-1)
+            list_of_class_ce.append(class_ce)
 
-        loss = K.mean(K.sum(total_ce, axis=-1))
+        loss = K.mean(K.sum(tf.stack(list_of_class_ce, axis=-1), axis=-1))
 
         return loss
 
@@ -375,13 +375,13 @@ def asymmetric_focal_tversky_loss(delta=0.7, gamma=0.75):
 
         # modify this section below for multiclass segmentation
         numClasses = K.int_shape(y_pred)[-1]
-        total_dice = background_dice
+        list_of_class_dice = [background_dice]
         for i in range(1, numClasses):
             class_dice = (1-dice_class[:,i]) * K.pow(1-dice_class[:,i], -gamma)
-            total_dice = tf.stack([total_dice, class_dice], axis=-1)
+            list_of_class_dice.append(class_dice)
 
         # Average class scores
-        loss = K.mean(total_dice)
+        loss = K.mean(tf.stack(list_of_class_dice, axis=-1))
 
         return loss
 
