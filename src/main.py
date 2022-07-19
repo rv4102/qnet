@@ -4,7 +4,8 @@ from model import *
 from utils.VARIABLES import *
 from utils.visualize import display
 from utils.create_dataset import *
-from utils.loss_functions import asym_unified_focal_loss, OneHotMeanIoU
+from utils.metrics import precision, recall, OneHotMeanIoU
+from utils.loss_functions import asym_unified_focal_loss
 
 # Compile the dataset
 image_paths, mask_paths = load_data(OUTPUT_DIR)
@@ -15,7 +16,8 @@ train, val, test = test_train_val_split(dataset, len(image_paths), train_percent
 input = tf.keras.layers.Input(shape=[TARGET_SIZE, TARGET_SIZE, 3])
 output = model(input)
 model = tf.keras.Model(input, output)
-model.compile(optimizer='adam', loss=asym_unified_focal_loss(), metrics=[OneHotMeanIoU(NUM_CLASSES, name='MeanIoU')])
+model.compile(optimizer='adam', loss=asym_unified_focal_loss(), metrics=[OneHotMeanIoU(NUM_CLASSES, name='MeanIoU'), precision, recall, tf.keras.metrics.AUC(multi_label=True,
+    num_labels=NUM_CLASSES, name='AUC')])
 # model.summary()
 
 save_model_path = '/kaggle/working/checkpoint_3'
