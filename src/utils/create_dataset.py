@@ -11,6 +11,7 @@ def load_data(path):
 def load_image_and_mask(image_path, mask_path):
     image = tf.io.read_file(image_path)
     image = tf.image.decode_jpeg(image, channels=3)
+    image = tf.image.per_image_standardization(image)
     image = tf.image.convert_image_dtype(image, tf.float32)
     image.set_shape([TARGET_SIZE, TARGET_SIZE, 3])
 
