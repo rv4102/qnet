@@ -1,9 +1,10 @@
 import numpy as np
+import tensorflow as tf
 from model import *
 from utils.VARIABLES import *
 from utils.visualize import display
 from utils.create_dataset import *
-from utils.loss_functions import asymmetric_focal_tversky_loss, OneHotMeanIoU
+from utils.loss_functions import asym_unified_focal_loss, OneHotMeanIoU
 
 # Compile the dataset
 image_paths, mask_paths = load_data(OUTPUT_DIR)
@@ -11,10 +12,10 @@ dataset = create_dataset(image_paths, mask_paths)
 train, val, test = test_train_val_split(dataset, len(image_paths), train_percent, val_percent, BATCH_SIZE)
 
 # Initialize the model
-input = Input(shape=[TARGET_SIZE, TARGET_SIZE, 3])
+input = tf.keras.layers.Input(shape=[TARGET_SIZE, TARGET_SIZE, 3])
 output = model(input)
-model = Model(input, output)
-model.compile(optimizer='adam', loss=asymmetric_focal_tversky_loss(), metrics=[OneHotMeanIoU(NUM_CLASSES, name='MeanIoU')])
+model = tf.keras.Model(input, output)
+model.compile(optimizer='adam', loss=asym_unified_focal_loss(), metrics=[OneHotMeanIoU(NUM_CLASSES, name='MeanIoU')])
 # model.summary()
 
 save_model_path = '/kaggle/working/checkpoint_3'
