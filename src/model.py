@@ -55,21 +55,21 @@ def dilated_spatial_pyramidal_pooling_conv(x, filters, kernel_size=3):
 
 def model(x):
     # Encoder
-    x = conv_bn(x, filters=16)
     x = conv_bn(x, filters=32)
-    x1 = dilated_spatial_pyramidal_pooling_conv(x, filters=16)
+    x = conv_bn(x, filters=32)
+    x1 = dilated_spatial_pyramidal_pooling_conv(x, filters=24)
     x = dilated_conv_bn(x, filters=64, rate=2)
     x = conv_bn(x, filters=32)
-    x2 = dilated_spatial_pyramidal_pooling_conv(x, filters=16)
+    x2 = dilated_spatial_pyramidal_pooling_conv(x, filters=24)
     x = dilated_conv_bn(x, filters=64, rate=4)
     x = conv_bn(x, filters=32)
-    x4 = dilated_spatial_pyramidal_pooling_conv(x, filters=16)
+    x4 = dilated_spatial_pyramidal_pooling_conv(x, filters=24)
     x = dilated_conv_bn(x, filters=64, rate=8)
     x = conv_bn(x, filters=32)
-    x8 = dilated_spatial_pyramidal_pooling_conv(x, filters=16)
+    x8 = dilated_spatial_pyramidal_pooling_conv(x, filters=24)
     x = dilated_conv_bn(x, filters=64, rate=16)
     x = conv_bn(x, filters=32)
-    x = conv_bn(x, filters=32)
+    x = conv_bn(x, filters=64)
 
     # Decoder
     x = tf.keras.layers.Concatenate(axis=3)([x8, x])
