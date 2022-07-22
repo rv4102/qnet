@@ -79,14 +79,12 @@ def unsplit_image(tiles4, image_shape):
     rowwise_tiles = tf.transpose(serialized_tiles, [1, 0, 2, 3])
     return tf.reshape(rowwise_tiles, [image_shape[0], image_shape[1], image_shape[2]])
 
-def load_image_and_mask(image_path, label_path):
-    # Read image and convert to tensor
-    img = cv2.imread(image_path)
-    label = cv2.imread(label_path, cv2.IMREAD_UNCHANGED)
-    img = tf.convert_to_tensor(img, tf.float32)
-    label = tf.convert_to_tensor(label, tf.float32)
-    label = label[..., tf.newaxis]
-
+# Read image and convert to tensor
+img = cv2.imread(IMAGE_PATH)
+label = cv2.imread(LABEL_PATH, cv2.IMREAD_UNCHANGED)
+img = tf.convert_to_tensor(img, tf.float32)
+label = tf.convert_to_tensor(label, tf.float32)
+label = label[..., tf.newaxis]
 
 # Pad the image and label
 original_label_shape, _ = pad_image_to_tile_multiple(label, [256, 256])
