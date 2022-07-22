@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from utils.loss_functions import asym_unified_focal_loss
+# from utils.loss_functions import asym_unified_focal_loss
+# from utils.metrics import OneHotMeanIoU
 
-# model = tf.keras.models.load_model('../saved_models/', custom_objects={'loss_function':asym_unified_focal_loss})
+# model = tf.keras.models.load_model('../../../model_6/', custom_objects={'loss_function':asym_unified_focal_loss, 'MeanIoU':OneHotMeanIoU})
 
 def display(display_list):
     plt.figure(figsize=(15, 15))
