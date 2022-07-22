@@ -4,7 +4,7 @@ from model import *
 from utils.VARIABLES import *
 from utils.visualize import show_predictions
 from utils.create_dataset import *
-from utils.metrics import precision, recall, OneHotMeanIoU
+from utils.metrics import OneHotMeanIoU
 from utils.loss_functions import asym_unified_focal_loss
 
 # Compile the dataset
@@ -55,6 +55,8 @@ history = model.fit(train.repeat(),
 
 # Save model progress to file             
 model.save('/kaggle/working/model_4')
+
+# model = model = tf.keras.models.load_model('/Users/rushil/Documents/RemoteSensing/model_6/', custom_objects={'loss_function':asym_unified_focal_loss, 'MeanIoU':OneHotMeanIoU})
 
 # Evaluate model on train dataset
 loss, acc, *is_anything_else_being_returned = model.evaluate(test, verbose=1, batch_size=BATCH_SIZE)
