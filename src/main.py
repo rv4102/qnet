@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from model import *
 from utils.VARIABLES import *
-from utils.visualize import display
+from utils.visualize import show_predictions
 from utils.create_dataset import *
 from utils.metrics import precision, recall, OneHotMeanIoU
 from utils.loss_functions import asym_unified_focal_loss
@@ -61,4 +61,4 @@ loss, acc, *is_anything_else_being_returned = model.evaluate(test, verbose=1, ba
 print('Restored model, accuracy: {:5.2f}%'.format(100 * acc))
 
 # Print the top images from the test dataset
-display(model, test, 15)
+show_predictions(model, test, 15)
