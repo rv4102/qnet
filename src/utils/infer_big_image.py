@@ -83,6 +83,7 @@ def unsplit_image(tiles4, image_shape):
 img = cv2.imread(IMAGE_PATH)
 label = cv2.imread(LABEL_PATH, cv2.IMREAD_UNCHANGED)
 img = tf.convert_to_tensor(img, tf.float32)
+img = img / 255.0
 label = tf.convert_to_tensor(label, tf.float32)
 label = label[..., tf.newaxis]
 
@@ -94,18 +95,6 @@ original_img_shape, img = pad_image_to_tile_multiple(img, [256, 256])
 # Split the padded image into batches and pad the batches
 tiles = split_image(img, [256, 256])
 
-# pred_masks = []
-# for tile in tf.unstack(tiles):
-#     plt.figure(figsize=(10,10))
-#     tile = tile[tf.newaxis,...]
-#     pred_mask = model.predict(tile)
-#     # Reduce the multi channel output to single channel (1,H,W)
-#     pred_mask = tf.math.argmax(pred_mask, axis=-1)
-#     # Expand dimension to (1,H,W,1)
-#     pred_mask = pred_mask[...,tf.newaxis]
-#     plt.imshow(tf.keras.utils.array_to_img(pred_mask[0]))
-#     pred_masks.append(pred_mask)
-# pred_masks = tf.concat(pred_masks, axis=0)
 pred_masks = model.predict(tiles)
 pred_masks = tf.math.argmax(pred_masks, axis=-1)
 pred_masks = pred_masks[...,tf.newaxis]
@@ -114,11 +103,6 @@ pred_mask = unsplit_image(pred_masks, padded_label_shape)
 # Remove the padding from the image and mask
 img = remove_image_padding(img, original_img_shape)
 pred_mask = remove_image_padding(pred_mask, original_label_shape)
-
-# print("Mask")
-# tf.print(pred_mask, summarize=3)
-# print("Label")
-# tf.print(label, summarize=3)
 
 # Convert the masks to a uint8 image
 label = from_one_hot_to_rgb_bkup(label)
