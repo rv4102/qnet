@@ -1,9 +1,33 @@
 import cv2
+import tensorflow as tf
 import matplotlib.pyplot as plt
 
-img_name = 'N-33-96-D-d-1-1'
+img_name = 'N-33-60-D-c-4-2'
 IMAGE_PATH = '../input/landcoverai/images/{}.tif'.format(img_name)
 LABEL_PATH = '../input/landcoverai/masks/{}.tif'.format(img_name)
+
+def from_one_hot_to_rgb_bkup(class_indexes, palette=None):
+    """ 
+    https://stackoverflow.com/a/60811084/6328456
+    Assign a different color to each class in the input tensor 
+    """
+    if palette is None:
+        palette = tf.constant(
+            [[0, 0, 0],
+            [31, 12, 33],
+            [13, 26, 33],
+            [21, 76, 22],
+            [22, 54, 66]]
+        , dtype=tf.int32)
+
+    H, W, _ = class_indexes.shape
+    class_indexes = tf.cast(class_indexes, tf.int32)
+
+    color_image = tf.gather(palette, class_indexes)
+    color_image = tf.reshape(color_image, [H, W, 3])
+
+    color_image = tf.cast(color_image, dtype=tf.float32)
+    return color_image
 
 def pad_image_to_tile_multiple(image3, tile_size, padding="CONSTANT"):
     '''
@@ -55,16 +79,14 @@ def unsplit_image(tiles4, image_shape):
     rowwise_tiles = tf.transpose(serialized_tiles, [1, 0, 2, 3])
     return tf.reshape(rowwise_tiles, [image_shape[0], image_shape[1], image_shape[2]])
 
-model = tf.keras.models.load_model('/kaggle/input/model5/model_5', compile=False)
+def load_image_and_mask(image_path, label_path):
+    # Read image and convert to tensor
+    img = cv2.imread(image_path)
+    label = cv2.imread(label_path, cv2.IMREAD_UNCHANGED)
+    img = tf.convert_to_tensor(img, tf.float32)
+    label = tf.convert_to_tensor(label, tf.float32)
+    label = label[..., tf.newaxis]
 
-# Read image and convert to tensor
-img = cv2.imread(IMAGE_PATH)
-plt.figure(figsize=(10,10))
-plt.imshow(img)
-label = cv2.imread(LABEL_PATH, cv2.IMREAD_UNCHANGED)
-img = tf.convert_to_tensor(img, tf.float32)
-label = tf.convert_to_tensor(label, tf.float32)
-label = label[..., tf.newaxis]
 
 # Pad the image and label
 original_label_shape, _ = pad_image_to_tile_multiple(label, [256, 256])
@@ -73,36 +95,38 @@ original_img_shape, img = pad_image_to_tile_multiple(img, [256, 256])
 
 # Split the padded image into batches and pad the batches
 tiles = split_image(img, [256, 256])
+
 # pred_masks = []
 # for tile in tf.unstack(tiles):
-# #     plt.figure(figsize=(10,10))
+#     plt.figure(figsize=(10,10))
 #     tile = tile[tf.newaxis,...]
 #     pred_mask = model.predict(tile)
 #     # Reduce the multi channel output to single channel (1,H,W)
 #     pred_mask = tf.math.argmax(pred_mask, axis=-1)
 #     # Expand dimension to (1,H,W,1)
 #     pred_mask = pred_mask[...,tf.newaxis]
-# #     plt.imshow(tf.keras.utils.array_to_img(pred_mask[0]))
+#     plt.imshow(tf.keras.utils.array_to_img(pred_mask[0]))
 #     pred_masks.append(pred_mask)
+# pred_masks = tf.concat(pred_masks, axis=0)
 pred_masks = model.predict(tiles)
 pred_masks = tf.math.argmax(pred_masks, axis=-1)
 pred_masks = pred_masks[...,tf.newaxis]
-# pred_masks = tf.concat(pred_masks, axis=0)
 pred_mask = unsplit_image(pred_masks, padded_label_shape)
 
 # Remove the padding from the image and mask
 img = remove_image_padding(img, original_img_shape)
 pred_mask = remove_image_padding(pred_mask, original_label_shape)
 
+# print("Mask")
+# tf.print(pred_mask, summarize=3)
+# print("Label")
+# tf.print(label, summarize=3)
+
 # Convert the masks to a uint8 image
+label = from_one_hot_to_rgb_bkup(label)
+pred_mask = from_one_hot_to_rgb_bkup(pred_mask)
 label = tf.keras.utils.array_to_img(label)
 pred_mask = tf.keras.utils.array_to_img(pred_mask)
-plt.figure(figsize=(10,10))
-plt.imshow(pred_mask)
-plt.figure(figsize=(10,10))
-plt.imshow(label)
-plt.figure(figsize=(10,10))
-plt.imshow(tf.keras.utils.array_to_img(img))
 
 # Save as png
 # img = tf.io.encode_png(tf.cast(img, tf.uint8))
