@@ -1,7 +1,7 @@
 # Variables
-IMGS_DIR = "../input/landcoverai/images/"
-MASKS_DIR = "../input/landcoverai/masks/"
-OUTPUT_DIR = "../input/d/rushilvenkateswar/landcoverai/kaggle/working/output/"
+IMGS_DIR = "/Users/rushil/Documents/RemoteSensing/LandCover/images/"
+MASKS_DIR = "/Users/rushil/Documents/RemoteSensing/LandCover/masks/"
+OUTPUT_DIR = "/Users/rushil/Documents/RemoteSensing/LandCover/output/"
 
 TARGET_SIZE = 256
 NUM_CLASSES = 5
