@@ -16,8 +16,20 @@ train, val, test = test_train_val_split(dataset, len(image_paths), train_percent
 input = tf.keras.layers.Input(shape=[TARGET_SIZE, TARGET_SIZE, 3])
 output = model(input)
 model = tf.keras.Model(input, output)
-model.compile(optimizer='adam', loss=asym_unified_focal_loss(), metrics=[OneHotMeanIoU(NUM_CLASSES, name='MeanIoU'), precision, recall, tf.keras.metrics.AUC(multi_label=True,
-    num_labels=NUM_CLASSES, name='AUC')])
+# 0 is background, 1 is building, 2 is woodland, 3 is water, 4 is road
+model.compile(optimizer='adam', loss=asym_unified_focal_loss(), 
+              metrics=[OneHotMeanIoU(NUM_CLASSES, name='MeanIoU'),
+                       tf.keras.metrics.Precision(name='bgrPcsn', class_id=0),
+                       tf.keras.metrics.Precision(name='bldPcsn', class_id=1),
+                       tf.keras.metrics.Precision(name='wldPcsn', class_id=2),
+                       tf.keras.metrics.Precision(name='wtrPcsn', class_id=3),
+                       tf.keras.metrics.Precision(name='roadPcsn', class_id=4),
+                       tf.keras.metrics.Recall(name='bgrRcl', class_id=0),
+                       tf.keras.metrics.Recall(name='bldRcl', class_id=1),
+                       tf.keras.metrics.Recall(name='wldRcl', class_id=2),
+                       tf.keras.metrics.Recall(name='wtrRcl', class_id=3),
+                       tf.keras.metrics.Recall(name='roadRcl', class_id=4)
+                      ])
 # model.summary()
 
 save_model_path = '/kaggle/working/checkpoint_3'
