@@ -11,7 +11,7 @@ def load_data(path):
 def load_image_and_mask(image_path, mask_path):
     image = tf.io.read_file(image_path)
     image = tf.image.decode_jpeg(image, channels=3)
-    image = tf.image.convert_image_dtype(image, tf.float32)
+    image = tf.image.convert_image_dtype(image, tf.float32) # This operation converts tensor to tf.float32 and divides all pixels by 255.
     image.set_shape([TARGET_SIZE, TARGET_SIZE, 3])
 
     mask = tf.io.read_file(mask_path)
@@ -23,7 +23,7 @@ def load_image_and_mask(image_path, mask_path):
 
     # mask = mask - 1 
     mask = tf.one_hot(mask, depth=NUM_CLASSES)
-    mask = tf.image.convert_image_dtype(mask, tf.float32)
+    mask = tf.image.convert_image_dtype(mask, tf.float32) # This operation converts tensor to tf.float32 and divides all pixels by 255.
     mask = tf.squeeze(mask)
     mask.set_shape([TARGET_SIZE, TARGET_SIZE, NUM_CLASSES])
     return image, mask
