@@ -11,13 +11,14 @@ def from_one_hot_to_rgb_bkup(class_indexes, palette=None):
     https://stackoverflow.com/a/60811084/6328456
     Assign a different color to each class in the input tensor 
     """
+    # 0 is background, 1 is building, 2 is woodland, 3 is water, 4 is road
     if palette is None:
         palette = tf.constant(
-            [[0, 0, 0],
-            [31, 12, 33],
-            [13, 26, 33],
-            [21, 76, 22],
-            [22, 54, 66]]
+            [[0, 0, 0], #background - black
+            [128, 87, 43], #building - brown
+            [12, 243, 12], #woodland - light green
+            [12, 122, 251], #water - sky blue
+            [79, 12, 75]] #road - dark purple
         , dtype=tf.int32)
 
     H, W, _ = class_indexes.shape
