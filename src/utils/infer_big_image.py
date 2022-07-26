@@ -80,6 +80,8 @@ def unsplit_image(tiles4, image_shape):
     rowwise_tiles = tf.transpose(serialized_tiles, [1, 0, 2, 3])
     return tf.reshape(rowwise_tiles, [image_shape[0], image_shape[1], image_shape[2]])
 
+# model = tf.keras.models.load_model('../input/model6/model_6/', compile=False)
+
 # Read image and convert to tensor
 img = cv2.imread(IMAGE_PATH)
 label = cv2.imread(LABEL_PATH, cv2.IMREAD_UNCHANGED)
