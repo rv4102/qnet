@@ -14,11 +14,11 @@ def from_one_hot_to_rgb_bkup(class_indexes, palette=None):
     # 0 is background, 1 is building, 2 is woodland, 3 is water, 4 is road
     if palette is None:
         palette = tf.constant(
-            [[0, 103, 0], #background - dark green
-            [255, 64, 255], #building - magenta
-            [0, 249, 0], #woodland - light green
-            [4, 51, 255], #water - blue
-            [255, 38, 0]] #road - red
+            [[255, 206, 92], #background - light orange
+            [239, 67, 107], #building - bright red
+            [5, 199, 147], #woodland - lime green
+            [38, 84, 125], #water - dark moderate blue
+            [255, 245, 235]] #road - white (pale orange)
         , dtype=tf.int32)
 
     H, W, _ = class_indexes.shape
